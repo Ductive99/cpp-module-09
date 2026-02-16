@@ -7,18 +7,25 @@
 #include <fstream>
 #include <iostream>
 
-struct Date {
+struct Date
+{
     int year;
     int month;
     int day;
+    
+    int toInt() const {
+        return year * 1000 + month * 100 + day * 1;
+    }
 };
 
-struct ExchangeRecord {
+struct ExchangeRecord
+{
     Date date;
     double rate;
 };
 
-Date parseDate(const std::string& dateStr);
-std::vector<ExchangeRecord> readCSV(const std::string& filename);
+Date parseDate(const std::string &dateStr);
+std::vector<ExchangeRecord> readCSV(const std::string &filename);
+void parseInputFile(const std::string &filename, const std::vector<ExchangeRecord> &database);
 
 #endif /* BITCOINEXCHANGE_HPP_ */
