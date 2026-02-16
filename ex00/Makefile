@@ -2,6 +2,7 @@ NAME = btc
 
 SRCS = BitcoinExchange.cpp main.cpp
 OBJS = ${SRCS:.cpp=.o}
+HEADERS = BitcoinExchange.hpp
 
 INCDIR = .
 
@@ -13,7 +14,7 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) -o $(NAME)
 
-%.o: %.cpp
+%.o: %.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@ -I $(INCDIR)
 
 clean:
