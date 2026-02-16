@@ -2,7 +2,10 @@
 #define BITCOINEXCHANGE_HPP_
 
 #include <string>
+#include <vector>
 #include <sstream>
+#include <fstream>
+#include <iostream>
 
 struct Date {
     int year;
@@ -16,6 +19,6 @@ struct ExchangeRecord {
 };
 
 Date parseDate(const std::string& dateStr);
-void read_data(ExchangeRecord &records);
+std::vector<ExchangeRecord> readCSV(const std::string& filename);
 
 #endif /* BITCOINEXCHANGE_HPP_ */
