@@ -1,28 +1,23 @@
 #include "BitcoinExchange.hpp"
-#include <iostream>
-#include <fstream>
-#include <vector>
 
 int main(int ac, char **av)
 {
-    std::ifstream file("data.csv");
     std::vector<ExchangeRecord> records;
 
     if (ac != 2)
     {
         std::cout << "Invalid Arguments!" << std::endl;
         std::cout << "Usage: " << av[0] << " <input_file>" << std::endl;
-        return (1);
-    }
-    if (!file.is_open()) {
-        std::cout << "Error: can't open file" << std::endl;
-        return (2);
+        return 1;
     }
 
-    // Read Data.csv
+    records = readCSV("data.csv");
+    if (records.size() == 0)
+        return 2;
 
+    std::cout << "Total records read: " << records.size() << std::endl;
 
-    // Read input file
+    parseInputFile(av[1], records);
 
-    // Check for value stored in records
+    return 0;
 }
