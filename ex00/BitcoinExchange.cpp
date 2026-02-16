@@ -1,32 +1,39 @@
 #include "BitcoinExchange.hpp"
-#include <stdlib.h>
-
-Date parseDate(const std::string &dateStr)
-{
-    Date d;
-    char dash;
-    std::stringstream ss(dateStr);
-
-    ss >> d.year >> dash >> d.month >> dash >> d.day;
-    return d;
-}
+#include <cstdlib>
+#include <algorithm>
 
 std::string trim(const std::string &str)
 {
     size_t start = 0;
     size_t end = str.length();
 
-    while (start < end && std::isspace(str[start]))
-    {
+    while (start < end && std::isspace(str[start])) {
         start++;
     }
 
-    while (end > start && std::isspace(str[end - 1]))
-    {
+    while (end > start && std::isspace(str[end - 1])) {
         end--;
     }
 
     return str.substr(start, end - start);
+}
+
+int parseDateToInt(const std::string& dateStr) {
+    int year, month, day;
+    char dash;
+    std::stringstream ss(dateStr);
+    
+    ss >> year >> dash >> month >> dash >> day;
+    
+    return year * 10000 + month * 100 + day;
+}
+
+bool compareExchangeRecords(const ExchangeRecord& a, const ExchangeRecord& b) {
+    return a.date < b.date;
+}
+
+bool compareRecordWithInt(const ExchangeRecord& rec, int targetDate) {
+    return rec.date < targetDate;
 }
 
 std::vector<ExchangeRecord> readCSV(const std::string &filename)
@@ -34,9 +41,8 @@ std::vector<ExchangeRecord> readCSV(const std::string &filename)
     std::vector<ExchangeRecord> records;
     std::ifstream file(filename.c_str());
 
-    if (!file.is_open())
-    {
-        std::cerr << "Error: Could not open file " << filename << std::endl;
+    if (!file.is_open()) {
+        std::cerr << "Error: could not open database file." << std::endl;
         return records;
     }
 
@@ -54,63 +60,61 @@ std::vector<ExchangeRecord> readCSV(const std::string &filename)
             ss >> rateVal;
 
             ExchangeRecord record;
-            record.date = parseDate(dateStr);
+            record.date = parseDateToInt(dateStr);
             record.rate = rateVal;
 
             records.push_back(record);
         }
     }
-
     file.close();
+
+    std::sort(records.begin(), records.end(), compareExchangeRecords);
+
     return records;
 }
 
-bool isValidDate(const Date &d)
+bool isValidDate(int date)
 {
-    if (d.year < 0 || d.month < 1 || d.month > 12 || d.day < 1 || d.day > 31)
-    {
+    int year = date / 10000;
+    int month = (date / 100) % 100;
+    int day = date % 100;
+
+    if (year < 0 || month < 1 || month > 12 || day < 1 || day > 31)
         return false;
-    }
 
     int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-    if (d.month == 2 && d.year % 4 == 0 && (d.year % 100 != 0 || d.year % 400 == 0))
-    {
-        if (d.day > 29)
+    if (month == 2) {
+        bool isLeap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+        if (isLeap) {
+            if (day > 29) return false;
+        } else {
+            if (day > 28) return false;
+        }
+    } else {
+        if (day > daysInMonth[month - 1])
             return false;
-    }
-    else if (d.day > daysInMonth[d.month - 1])
-    {
-        return false;
     }
 
     return true;
 }
 
-bool findExchangeRate(const std::vector<ExchangeRecord>& database, const Date& date, double& rate) {
-    int targetDateInt = date.toInt();
-    int closestDateInt = -1;
-    double closestRate = 0.0;
-    bool found = false;
-    
-    for (size_t i = 0; i < database.size(); ++i) {
-        int dbDateInt = database[i].date.toInt();
-        
-        if (dbDateInt <= targetDateInt) {
-            if (!found || dbDateInt > closestDateInt) {
-                closestDateInt = dbDateInt;
-                closestRate = database[i].rate;
-                found = true;
-            }
-        }
-    }
-    
-    if (found) {
-        rate = closestRate;
-        std::cout << closestDateInt;
+bool findExchangeRate(const std::vector<ExchangeRecord>& database, int targetDate, double& rate) {
+    std::vector<ExchangeRecord>::const_iterator it;
+
+    it = std::lower_bound(database.begin(), database.end(), targetDate, compareRecordWithInt);
+
+    if (it != database.end() && it->date == targetDate) {
+        rate = it->rate;
         return true;
     }
-    
+
+    if (it != database.begin()) {
+        --it;
+        rate = it->rate;
+        return true;
+    }
+
     return false;
 }
 
@@ -118,8 +122,7 @@ void parseInputFile(const std::string &filename, const std::vector<ExchangeRecor
 {
     std::ifstream file(filename.c_str());
 
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         std::cerr << "Error: could not open file." << std::endl;
         return;
     }
@@ -129,9 +132,10 @@ void parseInputFile(const std::string &filename, const std::vector<ExchangeRecor
 
     while (std::getline(file, line))
     {
+        if (line.empty()) continue;
+
         size_t pipePos = line.find('|');
-        if (pipePos == std::string::npos)
-        {
+        if (pipePos == std::string::npos) {
             std::cerr << "Error: bad input => " << line << std::endl;
             continue;
         }
@@ -139,38 +143,32 @@ void parseInputFile(const std::string &filename, const std::vector<ExchangeRecor
         std::string dateStr = trim(line.substr(0, pipePos));
         std::string valueStr = trim(line.substr(pipePos + 1));
 
-        Date date = parseDate(dateStr);
-        if (!isValidDate(date))
-        {
-            std::cerr << "Error: invalid date => " << dateStr << std::endl;
+        int dateInt = parseDateToInt(dateStr);
+        if (!isValidDate(dateInt)) {
+            std::cerr << "Error: bad input => " << dateStr << std::endl;
             continue;
         }
 
         char *endptr;
         double value = std::strtod(valueStr.c_str(), &endptr);
 
-        if (*endptr != '\0' && !std::isspace(*endptr))
-        {
-            std::cerr << "Error: invalid value => " << valueStr << std::endl;
+        if (*endptr != '\0') {
+            std::cerr << "Error: bad input => " << valueStr << std::endl;
             continue;
         }
 
-        if (value < 0)
-        {
+        if (value < 0) {
             std::cerr << "Error: not a positive number." << std::endl;
             continue;
         }
-
-        if (value > 1000)
-        {
+        if (value > 1000) {
             std::cerr << "Error: too large a number." << std::endl;
             continue;
         }
     
-        double exchangeRate;
-        if (findExchangeRate(database, date, exchangeRate)) {
-            std::cout << " >" << exchangeRate << "< ";
-            double result = value * exchangeRate;
+        double rate;
+        if (findExchangeRate(database, dateInt, rate)) {
+            double result = value * rate;
             std::cout << dateStr << " => " << value << " = " << result << std::endl;
         } else {
             std::cerr << "Error: no exchange rate available for date => " << dateStr << std::endl;
@@ -179,4 +177,3 @@ void parseInputFile(const std::string &filename, const std::vector<ExchangeRecor
 
     file.close();
 }
-
