@@ -1,8 +1,7 @@
 #include "RPN.hpp"
 
-void computeRPN(const char *str)
+void computeRPN(std::stack<int> &stack, const char *str)
 {
-    std::stack<int> stack;
     std::string token;
     std::stringstream ss(str);
 
@@ -11,10 +10,7 @@ void computeRPN(const char *str)
         if (token == "+" || token == "-" || token == "*" || token == "/")
         {
             if (stack.size() < 2)
-            {
-                std::cout << "Error" << std::endl;
-                return ;
-            }
+                throw InsufficientOperandsException();
             int right = stack.top(); stack.pop();
             int left = stack.top(); stack.pop();
 
@@ -27,18 +23,13 @@ void computeRPN(const char *str)
         {
             std::stringstream convert(token);
             int operand;
-            if (!(convert >> operand) || (operand >= 10 && operand < 0))
-            {
-                std::cout << "Error" << std::endl;
-                return ;
-            }
+            if (!(convert >> operand) || operand >= 10 || operand < 0)
+                throw InvalidOperandException();
             stack.push(operand);
         }
     }
+    if (stack.empty())
+        throw EmptyOperationException();
     if (stack.size() != 1)
-    {
-        std::cout << "Error" << std::endl;
-        return ;
-    }
-    std::cout << stack.top() << std::endl;
+        throw TooManyOperandsException();
 }
