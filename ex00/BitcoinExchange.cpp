@@ -1,6 +1,4 @@
 #include "BitcoinExchange.hpp"
-#include <cstdlib>
-#include <algorithm>
 
 std::string trim(const std::string &str)
 {
@@ -28,17 +26,8 @@ int parseDateToInt(const std::string& dateStr) {
     return year * 10000 + month * 100 + day;
 }
 
-bool compareExchangeRecords(const ExchangeRecord& a, const ExchangeRecord& b) {
-    return a.date < b.date;
-}
-
-bool compareRecordWithInt(const ExchangeRecord& rec, int targetDate) {
-    return rec.date < targetDate;
-}
-
-std::vector<ExchangeRecord> readCSV(const std::string &filename)
+std::map<int, double> &readCSV(std::map<int, double>& records, const std::string &filename)
 {
-    std::vector<ExchangeRecord> records;
     std::ifstream file(filename.c_str());
 
     if (!file.is_open()) {
@@ -59,16 +48,10 @@ std::vector<ExchangeRecord> readCSV(const std::string &filename)
             double rateVal;
             ss >> rateVal;
 
-            ExchangeRecord record;
-            record.date = parseDateToInt(dateStr);
-            record.rate = rateVal;
-
-            records.push_back(record);
+            records[parseDateToInt(dateStr)] = rateVal;
         }
     }
     file.close();
-
-    std::sort(records.begin(), records.end(), compareExchangeRecords);
 
     return records;
 }
@@ -99,26 +82,26 @@ bool isValidDate(int date)
     return true;
 }
 
-bool findExchangeRate(const std::vector<ExchangeRecord>& database, int targetDate, double& rate) {
-    std::vector<ExchangeRecord>::const_iterator it;
+bool findExchangeRate(const std::map<int, double>& database, int targetDate, double& rate) {
+    std::map<int, double>::const_iterator it;
 
-    it = std::lower_bound(database.begin(), database.end(), targetDate, compareRecordWithInt);
+    it = database.lower_bound(targetDate);
 
-    if (it != database.end() && it->date == targetDate) {
-        rate = it->rate;
+    if (it != database.end() && it->first == targetDate) {
+        rate = it->second;
         return true;
     }
 
     if (it != database.begin()) {
         --it;
-        rate = it->rate;
+        rate = it->second;
         return true;
     }
 
     return false;
 }
 
-void parseInputFile(const std::string &filename, const std::vector<ExchangeRecord> &database)
+void parseInputFile(const std::string &filename, const std::map<int, double> &database)
 {
     std::ifstream file(filename.c_str());
 

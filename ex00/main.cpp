@@ -2,7 +2,7 @@
 
 int main(int ac, char **av)
 {
-    std::vector<ExchangeRecord> records;
+    std::map<int, double> records;
 
     if (ac != 2)
     {
@@ -11,7 +11,7 @@ int main(int ac, char **av)
         return 1;
     }
 
-    records = readCSV("data.csv");
+    readCSV(records, "data.csv");
     if (records.size() == 0)
         return 2;
 
