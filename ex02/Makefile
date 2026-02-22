@@ -1,6 +1,6 @@
 NAME = PmergeMe
 
-SRCS = PmergeMe.cpp main.cpp
+SRCS = PmergeMe.cpp logic.cpp logic_deque.cpp main.cpp
 OBJS = ${SRCS:.cpp=.o}
 HEADERS = PmergeMe.hpp
 
