@@ -11,6 +11,9 @@
 #include <errno.h>
 #include <limits.h>
 
+#ifndef DEBUG
+    #define DEBUG false
+#endif
 
 
 extern unsigned int nbr_of_comps;

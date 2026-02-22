@@ -16,7 +16,7 @@ int main(int ac, char **av)
     std::cout << std::endl;
 
     nbr_of_comps = 0;
-    Timing result_vec = ford_johnson_sort(vec, false);
+    Timing result_vec = ford_johnson_sort(vec, DEBUG);
 
     std::cout << "After: ";
     for (int i = 0; i < ac - 1; i++)

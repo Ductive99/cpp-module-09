@@ -23,6 +23,9 @@ clean:
 fclean: clean
 	rm -f $(NAME)
 
+debug: fclean
+	$(CXX) $(CXXFLAGS) -DDEBUG=true $(SRCS) -o $(NAME) -I $(INCDIR)
+
 re: fclean all
 
 .PHONY: all clean fclean
