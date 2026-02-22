@@ -1,11 +1,5 @@
 #include "PmergeMe.hpp"
 
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <string>
-#include <ctime>
-
 unsigned int nbr_of_comps = 0;
 
 static int fj_level = 0;

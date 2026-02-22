@@ -1,11 +1,5 @@
 #include "PmergeMe.hpp"
 
-#include <iostream>
-#include <deque>
-#include <algorithm>
-#include <string>
-#include <ctime>
-
 unsigned int nbr_of_comps_deque = 0;
 
 template <typename T>
