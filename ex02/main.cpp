@@ -18,7 +18,7 @@ int main(int ac, char **av)
     nbr_of_comps = 0;
     Timing result_vec = ford_johnson_sort(vec, DEBUG);
 
-    std::cout << "After: ";
+    std::cout << "After:  ";
     for (int i = 0; i < ac - 1; i++)
         std::cout << vec[i] << " ";
     std::cout << std::endl;
@@ -26,9 +26,8 @@ int main(int ac, char **av)
     nbr_of_comps_deque = 0;
     Timing result_deque = ford_johnson_sort_deque(dq);
 
-    std::cout << "\n=== Timing Results ===\n";
-    std::cout << "Vector: " << result_vec.elapsed_ms << " ms, " << result_vec.comparisons << " comparisons\n";
-    std::cout << "Deque:  " << result_deque.elapsed_ms << " ms, " << result_deque.comparisons << " comparisons\n";
+    std::cout << "Time taken using std::vector: " << result_vec.elapsed_ms << " ms, " << result_vec.comparisons << " comparisons\n";
+    std::cout << "Time take using std::deque:   " << result_deque.elapsed_ms << " ms, " << result_deque.comparisons << " comparisons\n";
 
     return 0;
 }
