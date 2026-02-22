@@ -164,8 +164,16 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
     }
 
     if (has_straggler) {
+        // The straggler should be inserted by comparing with the first pend inserted
+        // which is sorted_losers[0]. Search only from beginning to the position after first pend.
+        unsigned first_pend = sorted_losers[0];
+        std::vector<unsigned>::iterator first_pend_it = std::find(
+            main_chain.begin(), main_chain.end(), first_pend
+        );
+        size_t first_pend_pos = std::distance(main_chain.begin(), first_pend_it);
+        
         std::vector<unsigned>::iterator insert_pos = std::lower_bound(
-            main_chain.begin(), main_chain.end(), straggler_val, comp<unsigned>
+            main_chain.begin(), main_chain.begin() + first_pend_pos + 1, straggler_val, comp<unsigned>
         );
         size_t insert_idx = std::distance(main_chain.begin(), insert_pos);
         

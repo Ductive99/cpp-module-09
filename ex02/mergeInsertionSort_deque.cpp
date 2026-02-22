@@ -106,8 +106,14 @@ std::deque<unsigned> fj_recursive_deque(std::deque<unsigned>& arr) {
     }
 
     if (has_straggler) {
+        unsigned first_pend = sorted_losers[0];
+        std::deque<unsigned>::iterator first_pend_it = std::find(
+            main_chain.begin(), main_chain.end(), first_pend
+        );
+        size_t first_pend_pos = std::distance(main_chain.begin(), first_pend_it);
+        
         std::deque<unsigned>::iterator insert_pos = std::lower_bound(
-            main_chain.begin(), main_chain.end(), straggler_val, comp_deque<unsigned>
+            main_chain.begin(), main_chain.begin() + first_pend_pos + 1, straggler_val, comp_deque<unsigned>
         );
         size_t insert_idx = std::distance(main_chain.begin(), insert_pos);
         
