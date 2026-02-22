@@ -33,10 +33,3 @@ Iterate through your "pend" elements using the Jacobsthal-based order you just g
 * *C++ Implementation Tip:* Use `std::upper_bound` from the `<algorithm>` library to perform the binary search. You must carefully define your search area (the iterators you pass to `upper_bound`). Because of the algorithm's guarantees, you only need to search up to the corresponding $a$ element's current position in the main chain.
 
 I hope this helps! Do you have any further questions? Ask ChatGPT. ;)
-
-
-### C++ Specific Testing & Optimization Tips
-
-* **Use `std::vector`:** Implementing this algorithm heavily relies on random access and dynamic sizing, making `std::vector` the optimal standard library container to use.
-* **Track Your Comparisons:** The entire point of Ford-Johnson is to minimize comparisons. To verify your C++ implementation is correct, create a custom comparison template function (e.g., `_comp(T lv, T rv)`) that increments a `static int nbr_of_comps` every time it evaluates two elements. Pass this custom comparator to `std::upper_bound` and your internal sorting functions.
-* **Benchmark Against the Math:** You can calculate the exact maximum theoretical comparisons $F(n)$ your C++ code should make for $n$ numbers using the formula: $\sum_{k=1}^{n} \lceil \log_2(\frac{3}{4}k) \rceil$. If your static comparison counter exceeds this theoretical limit during testing, your implementation has a flaw.
