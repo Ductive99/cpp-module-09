@@ -56,7 +56,6 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
     std::vector<unsigned> perm(n);
     if (debug) {
         ++fj_level;
-
         print_indent(fj_level - 1);
         std::cout << "fj_recursive level " << fj_level - 1 << " enter, n=" << n << "\n";
         print_vec("input", arr, fj_level - 1);
@@ -88,14 +87,14 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
     if (has_straggler) {
         straggler_val = arr.back();
         straggler_idx = n - 1;
-    }
-
-    if (has_straggler && debug) {
-        print_indent(fj_level - 1);
-        std::cout << "straggler detected: val=" << straggler_val << " idx=" << straggler_idx << "\n";
+        if (debug) {
+            print_indent(fj_level - 1);
+            std::cout << "straggler detected: val=" << straggler_val << " idx=" << straggler_idx << "\n";
+        }
     }
 
     std::vector<unsigned> child_perm = fj_recursive(winners, debug);
+    
     if (debug) {
         print_indent(fj_level - 1);
         std::cout << "returned from recursion: child_perm = [";
@@ -116,10 +115,18 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
         sorted_winners_orig[i] = winners_orig_idx[child_perm[i]];
     }
 
+    if (has_straggler) {
+        sorted_losers.push_back(straggler_val);
+        sorted_losers_orig.push_back(straggler_idx);
+        if (debug) {
+            print_indent(fj_level - 1);
+            std::cout << "Appended straggler to sorted_losers: val=" << straggler_val << "\n";
+        }
+    }
+
     std::vector<unsigned> main_chain = winners;
     std::vector<unsigned> main_chain_orig = sorted_winners_orig;
 
-    // sorted based on index
     if (!sorted_losers.empty()) {
         main_chain.insert(main_chain.begin(), sorted_losers[0]);
         main_chain_orig.insert(main_chain_orig.begin(), sorted_losers_orig[0]);
@@ -140,13 +147,18 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
     
     for (size_t i = 0; i < order.size(); ++i) {
         unsigned idx = order[i];
+        size_t search_dist;
 
-        unsigned paired_winner_orig = sorted_winners_orig[idx];
-        std::vector<unsigned>::iterator bound_it = std::find(
-            main_chain_orig.begin(), main_chain_orig.end(), paired_winner_orig
-        );
+        if (has_straggler && idx == sorted_losers.size() - 1) {
+            search_dist = main_chain.size();
+        } else {
+            unsigned paired_winner_orig = sorted_winners_orig[idx];
+            std::vector<unsigned>::iterator bound_it = std::find(
+                main_chain_orig.begin(), main_chain_orig.end(), paired_winner_orig
+            );
+            search_dist = std::distance(main_chain_orig.begin(), bound_it);
+        }
 
-        size_t search_dist = std::distance(main_chain_orig.begin(), bound_it);
         std::vector<unsigned>::iterator insert_pos = std::lower_bound(
             main_chain.begin(), main_chain.begin() + search_dist, sorted_losers[idx], comp<unsigned>
         );
@@ -156,34 +168,10 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
         if (debug) {
             print_indent(fj_level - 1);
             std::cout << "Inserting pend[" << idx << "]=" << sorted_losers[idx]
-                      << " paired_winner_orig=" << paired_winner_orig
                       << " at index=" << insert_idx << "\n";
         }
         main_chain.insert(main_chain.begin() + insert_idx, sorted_losers[idx]);
         main_chain_orig.insert(main_chain_orig.begin() + insert_idx, sorted_losers_orig[idx]);
-    }
-
-    if (has_straggler) {
-        // The straggler should be inserted by comparing with the first pend inserted
-        // which is sorted_losers[0]. Search only from beginning to the position after first pend.
-        unsigned first_pend = sorted_losers[0];
-        std::vector<unsigned>::iterator first_pend_it = std::find(
-            main_chain.begin(), main_chain.end(), first_pend
-        );
-        size_t first_pend_pos = std::distance(main_chain.begin(), first_pend_it);
-        
-        std::vector<unsigned>::iterator insert_pos = std::lower_bound(
-            main_chain.begin(), main_chain.begin() + first_pend_pos + 1, straggler_val, comp<unsigned>
-        );
-        size_t insert_idx = std::distance(main_chain.begin(), insert_pos);
-        
-        main_chain.insert(main_chain.begin() + insert_idx, straggler_val);
-        main_chain_orig.insert(main_chain_orig.begin() + insert_idx, straggler_idx);
-
-        if (debug) {
-            print_indent(fj_level - 1);
-            std::cout << "Inserted straggler val=" << straggler_val << " at index=" << insert_idx << "\n";
-        }
     }
 
     arr = main_chain;
@@ -191,7 +179,6 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
         print_vec("resulting main_chain", main_chain, fj_level - 1);
         print_indent(fj_level - 1);
         std::cout << "fj_recursive level " << fj_level - 1 << " exit\n";
-
         --fj_level;
     }
 

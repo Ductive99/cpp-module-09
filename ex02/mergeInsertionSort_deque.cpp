@@ -38,7 +38,6 @@ std::deque<unsigned> fj_recursive_deque(std::deque<unsigned>& arr) {
     size_t n = arr.size();
 
     std::deque<unsigned> perm(n);
-
     for (size_t i = 0; i < n; ++i) perm[i] = i;
 
     if (n <= 1) return perm;
@@ -75,10 +74,14 @@ std::deque<unsigned> fj_recursive_deque(std::deque<unsigned>& arr) {
         sorted_winners_orig[i] = winners_orig_idx[child_perm[i]];
     }
 
+    if (has_straggler) {
+        sorted_losers.push_back(straggler_val);
+        sorted_losers_orig.push_back(straggler_idx);
+    }
+
     std::deque<unsigned> main_chain = winners;
     std::deque<unsigned> main_chain_orig = sorted_winners_orig;
 
-    // sorted based on index
     if (!sorted_losers.empty()) {
         main_chain.insert(main_chain.begin(), sorted_losers[0]);
         main_chain_orig.insert(main_chain_orig.begin(), sorted_losers_orig[0]);
@@ -88,13 +91,18 @@ std::deque<unsigned> fj_recursive_deque(std::deque<unsigned>& arr) {
     
     for (size_t i = 0; i < order.size(); ++i) {
         unsigned idx = order[i];
+        size_t search_dist;
 
-        unsigned paired_winner_orig = sorted_winners_orig[idx];
-        std::deque<unsigned>::iterator bound_it = std::find(
-            main_chain_orig.begin(), main_chain_orig.end(), paired_winner_orig
-        );
+        if (has_straggler && idx == sorted_losers.size() - 1) {
+            search_dist = main_chain.size();
+        } else {
+            unsigned paired_winner_orig = sorted_winners_orig[idx];
+            std::deque<unsigned>::iterator bound_it = std::find(
+                main_chain_orig.begin(), main_chain_orig.end(), paired_winner_orig
+            );
+            search_dist = std::distance(main_chain_orig.begin(), bound_it);
+        }
 
-        size_t search_dist = std::distance(main_chain_orig.begin(), bound_it);
         std::deque<unsigned>::iterator insert_pos = std::lower_bound(
             main_chain.begin(), main_chain.begin() + search_dist, sorted_losers[idx], comp_deque<unsigned>
         );
@@ -103,22 +111,6 @@ std::deque<unsigned> fj_recursive_deque(std::deque<unsigned>& arr) {
 
         main_chain.insert(main_chain.begin() + insert_idx, sorted_losers[idx]);
         main_chain_orig.insert(main_chain_orig.begin() + insert_idx, sorted_losers_orig[idx]);
-    }
-
-    if (has_straggler) {
-        unsigned first_pend = sorted_losers[0];
-        std::deque<unsigned>::iterator first_pend_it = std::find(
-            main_chain.begin(), main_chain.end(), first_pend
-        );
-        size_t first_pend_pos = std::distance(main_chain.begin(), first_pend_it);
-        
-        std::deque<unsigned>::iterator insert_pos = std::lower_bound(
-            main_chain.begin(), main_chain.begin() + first_pend_pos + 1, straggler_val, comp_deque<unsigned>
-        );
-        size_t insert_idx = std::distance(main_chain.begin(), insert_pos);
-        
-        main_chain.insert(main_chain.begin() + insert_idx, straggler_val);
-        main_chain_orig.insert(main_chain_orig.begin() + insert_idx, straggler_idx);
     }
 
     arr = main_chain;
