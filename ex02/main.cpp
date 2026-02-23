@@ -1,5 +1,15 @@
 #include "PmergeMe.hpp"
 
+template <typename T>
+bool checkSorted(T& v) {
+    if (v.size() < 2) return true;
+    for (size_t i = 0; i < v.size() - 1; ++i) {
+        if (v[i] > v[i + 1]) {
+            return false;
+        }
+    }
+    return true;
+}
 
 int main(int ac, char **av)
 {
@@ -28,6 +38,12 @@ int main(int ac, char **av)
 
     std::cout << "Time taken using std::vector: " << result_vec.elapsed_ms << " ms, " << result_vec.comparisons << " comparisons\n";
     std::cout << "Time take using std::deque:   " << result_deque.elapsed_ms << " ms, " << result_deque.comparisons << " comparisons\n";
+
+    bool sorted = checkSorted(vec) && checkSorted(dq);
+    if (sorted)
+        std::cout << ">>> SUCCESS <<<" << std::endl;
+    else
+        std::cout << ">>> FAILURE <<<" << std::endl;
 
     return 0;
 }
