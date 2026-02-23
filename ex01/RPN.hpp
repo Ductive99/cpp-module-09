@@ -36,4 +36,11 @@ public:
     }
 };
 
+class ZeroDivisionException : public std::exception {
+public:
+    const char* what () const throw () {
+        return "Error: Can't divide by zero.";
+    }
+};
+
 #endif /* RPN_HPP_ */

@@ -17,6 +17,7 @@ void computeRPN(std::stack<int> &stack, const char *str)
             if (token == "+") stack.push(left + right);
             if (token == "-") stack.push(left - right);
             if (token == "*") stack.push(left * right);
+            if (token == "/" && right == 0) throw ZeroDivisionException();
             if (token == "/") stack.push(left / right);
         }
         else
