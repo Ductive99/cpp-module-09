@@ -130,6 +130,7 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
     if (!sorted_losers.empty()) {
         main_chain.insert(main_chain.begin(), sorted_losers[0]);
         main_chain_orig.insert(main_chain_orig.begin(), sorted_losers_orig[0]);
+        
         if (debug) {
             print_indent(fj_level - 1);
             std::cout << "Inserted first pend without comparisons: " << sorted_losers[0] << "\n";
@@ -145,6 +146,9 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
         }
     }
     
+    std::vector<size_t> winner_pos(winners.size());
+    for (size_t i = 0; i < winners.size(); ++i) winner_pos[i] = i + 1;
+
     for (size_t i = 0; i < order.size(); ++i) {
         unsigned idx = order[i];
         size_t search_dist;
@@ -152,11 +156,7 @@ std::vector<unsigned> fj_recursive(std::vector<unsigned>& arr, bool debug) {
         if (has_straggler && idx == sorted_losers.size() - 1) {
             search_dist = main_chain.size();
         } else {
-            unsigned paired_winner_orig = sorted_winners_orig[idx];
-            std::vector<unsigned>::iterator bound_it = std::find(
-                main_chain_orig.begin(), main_chain_orig.end(), paired_winner_orig
-            );
-            search_dist = std::distance(main_chain_orig.begin(), bound_it);
+            search_dist = winner_pos[idx] + i;
         }
 
         std::vector<unsigned>::iterator insert_pos = std::lower_bound(

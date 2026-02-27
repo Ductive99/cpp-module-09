@@ -88,6 +88,9 @@ std::deque<unsigned> fj_recursive_deque(std::deque<unsigned>& arr) {
     }
 
     std::deque<unsigned> order = build_jacobsthal_order_deque(sorted_losers.size());
+
+    std::deque<size_t> winner_pos(winners.size());
+    for (size_t i = 0; i < winners.size(); ++i) winner_pos[i] = i + 1;
     
     for (size_t i = 0; i < order.size(); ++i) {
         unsigned idx = order[i];
@@ -96,11 +99,7 @@ std::deque<unsigned> fj_recursive_deque(std::deque<unsigned>& arr) {
         if (has_straggler && idx == sorted_losers.size() - 1) {
             search_dist = main_chain.size();
         } else {
-            unsigned paired_winner_orig = sorted_winners_orig[idx];
-            std::deque<unsigned>::iterator bound_it = std::find(
-                main_chain_orig.begin(), main_chain_orig.end(), paired_winner_orig
-            );
-            search_dist = std::distance(main_chain_orig.begin(), bound_it);
+            search_dist = winner_pos[idx] + i;
         }
 
         std::deque<unsigned>::iterator insert_pos = std::lower_bound(
