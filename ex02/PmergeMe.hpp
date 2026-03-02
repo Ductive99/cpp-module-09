@@ -11,12 +11,8 @@
 #include <errno.h>
 #include <limits.h>
 
-#ifndef DEBUG
-    #define DEBUG false
-#endif
-
-
 extern unsigned int nbr_of_comps;
+extern unsigned int nbr_of_comps_deque;
 
 typedef struct s_timing {
     double elapsed_ms;
@@ -26,10 +22,29 @@ typedef struct s_timing {
 int populateVector(std::vector<unsigned>&, int ac, char **av);
 void FordJohnsonSort(std::vector<unsigned>& vec);
 
-Timing ford_johnson_sort(std::vector<unsigned>& data, bool debug = false);
+Timing ford_johnson_sort(std::vector<unsigned>& data);
 Timing ford_johnson_sort_deque(std::deque<unsigned>& data);
 
-extern unsigned int nbr_of_comps_deque;
+template <typename T>
+bool checkSorted(T& v, size_t size) {
+    if (v.size() != size) return false;
+    if (v.size() < 2) return true;
+    for (size_t i = 0; i < v.size() - 1; ++i) {
+        if (v[i] > v[i + 1]) {
+            return false;
+        }
+    }
+    return true;
+}
 
+template <typename T>
+void printNumbers(const char *str, T& v) {
+    size_t i = 0;
+
+    std::cout << str;
+    for (; i < v.size() - 1; i++)
+        std::cout << v[i] << " ";
+    std::cout << v[i] << std::endl;
+}
 
 #endif /* PMERGEME_HPP_ */

@@ -1,6 +1,6 @@
 NAME = PmergeMe
 
-SRCS = PmergeMe.cpp mergeInsertionSort_vector.cpp mergeInsertionSort_deque.cpp main.cpp
+SRCS = PmergeMe.cpp utils.cpp main.cpp
 OBJS = ${SRCS:.cpp=.o}
 HEADERS = PmergeMe.hpp
 
@@ -22,9 +22,6 @@ clean:
 
 fclean: clean
 	rm -f $(NAME)
-
-debug: fclean
-	$(CXX) $(CXXFLAGS) -DDEBUG=true $(SRCS) -o $(NAME) -I $(INCDIR)
 
 re: fclean all
 
